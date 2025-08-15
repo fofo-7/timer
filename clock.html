@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Timer HIIT Online</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        padding: 20px;
+        background: #f5f5f5;
+        color: #333;
+    }
+    h1 {
+        margin-bottom: 10px;
+    }
+    input {
+        padding: 5px;
+        width: 80px;
+        text-align: center;
+        margin: 5px;
+    }
+    button {
+        padding: 10px 20px;
+        margin: 10px;
+        border: none;
+        border-radius: 5px;
+        background: #00a86b;
+        color: white;
+        cursor: pointer;
+    }
+    button:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+    }
+    #time-display {
+        font-size: 3em;
+        margin-top: 20px;
+    }
+</style>
+</head>
+<body>
+
+<h1>Timer HIIT Online</h1>
+<p>Imposta i secondi per lavoro e riposo:</p>
+<label>Lavoro: <input type="number" id="workTime" value="20"></label>
+<label>Riposo: <input type="number" id="restTime" value="10"></label>
+<br>
+<button id="startBtn">Avvia</button>
+<button id="stopBtn" disabled>Stop</button>
+
+<div id="time-display">00:00</div>
+<p id="status">Pronto</p>
+
+<audio id="beep" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
+
+<script>
+let timer;
+let isWorking = true;
+let secondsLeft = 0;
+
+const workInput = document.getElementById('workTime');
+const restInput = document.getElementById('restTime');
+const display = document.getElementById('time-display');
+const statusText = document.getElementById('status');
+const startBtn = document.getElementById('startBtn');
+const stopBtn = document.getElementById('stopBtn');
+const beep = document.getElementById('beep');
+
+function updateDisplay() {
+    let min = Math.floor(secondsLeft / 60);
+    let sec = secondsLeft % 60;
+    display.textContent = `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+}
+
+function startTimer() {
+    isWorking = true;
+    secondsLeft = parseInt(workInput.value);
+    updateDisplay();
+    statusText.textContent = "Lavoro!";
+    startBtn.disabled = true;
+    stopBtn.disabled = false;
+
+    timer = setInterval(() => {
+        secondsLeft--;
+        updateDisplay();
+
+        if (secondsLeft <= 0) {
+            beep.play();
+            if (isWorking) {
+                isWorking = false;
+                secondsLeft = parseInt(restInput.value);
+                statusText.textContent = "Riposo...";
+            } else {
+                isWorking = true;
+                secondsLeft = parseInt(workInput.value);
+                statusText.textContent = "Lavoro!";
+            }
+        }
+    }, 1000);
+}
+
+function stopTimer() {
+    clearInterval(timer);
+    startBtn.disabled = false;
+    stopBtn.disabled = true;
+    statusText.textContent = "Pronto";
+    display.textContent = "00:00";
+}
+
+startBtn.addEventListener('click', startTimer);
+stopBtn.addEventListener('click', stopTimer);
+</script>
+
+</body>
+</html>
